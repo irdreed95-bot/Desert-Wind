@@ -11,29 +11,29 @@ export function Footer() {
           <p className="text-muted-foreground mb-8">
             وجهتك الأولى لأحدث أجهزة ومكونات الكمبيوتر في العراق. التجميعات الأسطورية بأفضل الأسعار.
           </p>
-          
+
           <div className="flex items-center justify-center gap-6 mb-12">
-            <a href="https://wa.me/9647800000000" target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-[#25D366] transition-colors" data-testid="footer-whatsapp">
-              <SiWhatsapp size={24} />
+            <a href="https://wa.me/9647700094959" target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-[#25D366] transition-colors" data-testid="footer-whatsapp">
+              <SiWhatsapp size={28} />
             </a>
-            <a href="https://instagram.com/_x1om_" target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-[#E1306C] transition-colors" data-testid="footer-instagram">
-              <SiInstagram size={24} />
+            <a href="https://www.instagram.com/al_yanabee?igsh=NnZuYngxZHJ0OHBw" target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-[#E1306C] transition-colors" data-testid="footer-instagram">
+              <SiInstagram size={28} />
             </a>
-            <a href="https://t.me/whitewolfiq" target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-[#26A5E4] transition-colors" data-testid="footer-telegram">
-              <SiTelegram size={24} />
+            <a href="https://t.me/alyanabe" target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-[#26A5E4] transition-colors" data-testid="footer-telegram">
+              <SiTelegram size={28} />
             </a>
-            <a href="https://facebook.com/whitewolfiq" target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-[#1877F2] transition-colors" data-testid="footer-facebook">
-              <SiFacebook size={24} />
+            <a href="https://www.facebook.com/share/1BKVF98W2o/" target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-[#1877F2] transition-colors" data-testid="footer-facebook">
+              <SiFacebook size={28} />
             </a>
-            <a href="https://youtube.com/@whitewolfiq" target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-[#FF0000] transition-colors" data-testid="footer-youtube">
-              <SiYoutube size={24} />
+            <a href="https://youtube.com/@al_yanabee?si=HuBZLQfWVmAEzuK_" target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-[#FF0000] transition-colors" data-testid="footer-youtube">
+              <SiYoutube size={28} />
             </a>
           </div>
         </div>
-        
+
         <div className="border-t border-border pt-8 flex flex-col md:flex-row items-center justify-between text-sm text-muted-foreground gap-4">
           <p>© 2026 الذيب الأبيض - جميع الحقوق محفوظة</p>
-          <p className="font-semibold text-white/50">العراق</p>
+          <p className="font-semibold text-white/50">العراق 🇮🇶</p>
         </div>
       </div>
     </footer>
