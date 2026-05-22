@@ -36,10 +36,38 @@ function FileUploadField({
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    // Warn immediately for very large files (> 80 MB)
+    const MAX_BYTES = 80 * 1024 * 1024;
+    if (file.size > MAX_BYTES) {
+      alert('الملف حجمه كبير جداً — يرجى رفع صورة أو فيديو بحجم أصغر أو تقليل مدة الفيديو.');
+      e.target.value = '';
+      return;
+    }
+
     const reader = new FileReader();
+
     reader.onload = () => {
-      onChange(reader.result as string);
+      try {
+        onChange(reader.result as string);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        const isQuota =
+          msg.includes('QuotaExceeded') ||
+          msg.includes('NS_ERROR_DOM_QUOTA_REACHED') ||
+          msg.includes('exceeded');
+        if (isQuota) {
+          alert('الملف حجمه كبير جداً — يرجى رفع صورة أو فيديو بحجم أصغر أو تقليل مدة الفيديو.');
+        } else {
+          alert('حدث خطأ أثناء معالجة الملف. يرجى المحاولة مجدداً.');
+        }
+      }
     };
+
+    reader.onerror = () => {
+      alert('تعذّر قراءة الملف. يرجى المحاولة مجدداً.');
+    };
+
     reader.readAsDataURL(file);
   };
 

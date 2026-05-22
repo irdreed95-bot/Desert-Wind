@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { dbGet, dbSet } from '../lib/db';
 
 export interface Product {
   id: string;
@@ -28,44 +29,44 @@ const DEFAULT_BANNER: Banner = {
   subtitle: "اكتشف أحدث مكونات الكمبيوتر وابنِ جهازك المثالي",
   ctaText: "تسوق الآن",
   imageUrl: "",
-  videoUrl: ""
+  videoUrl: "",
 };
 
 const DEFAULT_PRODUCTS: Omit<Product, 'id'>[] = [
   { title: "Intel Core i9-14900K", price: 1850000, currency: "IQD", stockStatus: "in_stock", stockLabel: "متوفر", imageUrl: "", specs: "", category: "cpus", badge: "", isFeatured: false, isBestSelling: false },
   { title: "AMD Ryzen 9 7950X", price: 1650000, currency: "IQD", stockStatus: "in_stock", stockLabel: "متوفر", imageUrl: "", specs: "", category: "cpus", badge: "", isFeatured: false, isBestSelling: false },
   { title: "Intel Core i7-13700K", price: 950000, currency: "IQD", stockStatus: "low_stock", stockLabel: "باقي 3 قطع", imageUrl: "", specs: "", category: "cpus", badge: "", isFeatured: false, isBestSelling: true },
-  
+
   { title: "RTX 4090", price: 3200000, currency: "IQD", stockStatus: "in_stock", stockLabel: "متوفر", imageUrl: "", specs: "", category: "gpus", badge: "الأقوى", isFeatured: true, isBestSelling: false },
   { title: "RTX 4070 Ti", price: 1800000, currency: "IQD", stockStatus: "in_stock", stockLabel: "متوفر", imageUrl: "", specs: "", category: "gpus", badge: "", isFeatured: false, isBestSelling: true },
   { title: "RX 7900 XTX", price: 2100000, currency: "IQD", stockStatus: "low_stock", stockLabel: "باقي قطعتان", imageUrl: "", specs: "", category: "gpus", badge: "", isFeatured: false, isBestSelling: false },
-  
+
   { title: "Kingston 32GB DDR5", price: 420000, currency: "IQD", stockStatus: "in_stock", stockLabel: "متوفر", imageUrl: "", specs: "", category: "ram", badge: "", isFeatured: false, isBestSelling: false },
   { title: "Corsair 64GB DDR5", price: 780000, currency: "IQD", stockStatus: "in_stock", stockLabel: "متوفر", imageUrl: "", specs: "", category: "ram", badge: "جديد", isFeatured: false, isBestSelling: false },
   { title: "G.Skill 16GB DDR4", price: 210000, currency: "IQD", stockStatus: "in_stock", stockLabel: "متوفر", imageUrl: "", specs: "", category: "ram", badge: "", isFeatured: false, isBestSelling: true },
-  
+
   { title: "Samsung 990 Pro 2TB NVMe", price: 480000, currency: "IQD", stockStatus: "in_stock", stockLabel: "متوفر", imageUrl: "", specs: "", category: "storage", badge: "", isFeatured: false, isBestSelling: true },
   { title: "WD Black 4TB HDD", price: 280000, currency: "IQD", stockStatus: "in_stock", stockLabel: "متوفر", imageUrl: "", specs: "", category: "storage", badge: "", isFeatured: false, isBestSelling: false },
   { title: "Seagate Barracuda 2TB", price: 150000, currency: "IQD", stockStatus: "out_of_stock", stockLabel: "نفذ من المخزون", imageUrl: "", specs: "", category: "storage", badge: "", isFeatured: false, isBestSelling: false },
-  
-  { title: "Samsung Odyssey G9 49\"", price: 2800000, currency: "IQD", stockStatus: "in_stock", stockLabel: "متوفر", imageUrl: "", specs: "", category: "monitors", badge: "إلترا وايد", isFeatured: false, isBestSelling: false },
-  { title: "LG UltraGear 27\" 165Hz", price: 680000, currency: "IQD", stockStatus: "in_stock", stockLabel: "متوفر", imageUrl: "", specs: "", category: "monitors", badge: "", isFeatured: false, isBestSelling: true },
+
+  { title: 'Samsung Odyssey G9 49"', price: 2800000, currency: "IQD", stockStatus: "in_stock", stockLabel: "متوفر", imageUrl: "", specs: "", category: "monitors", badge: "إلترا وايد", isFeatured: false, isBestSelling: false },
+  { title: 'LG UltraGear 27" 165Hz', price: 680000, currency: "IQD", stockStatus: "in_stock", stockLabel: "متوفر", imageUrl: "", specs: "", category: "monitors", badge: "", isFeatured: false, isBestSelling: true },
   { title: "ASUS ROG Swift 240Hz", price: 920000, currency: "IQD", stockStatus: "low_stock", stockLabel: "باقي قطعة واحدة", imageUrl: "", specs: "", category: "monitors", badge: "", isFeatured: false, isBestSelling: false },
-  
+
   { title: "تجميعة الذيب الأبيض - الأسطورة", price: 8500000, currency: "IQD", stockStatus: "in_stock", stockLabel: "متوفر", imageUrl: "", specs: "", category: "custom_builds", badge: "حصري", isFeatured: true, isBestSelling: false },
   { title: "تجميعة المحترف للتصميم", price: 5200000, currency: "IQD", stockStatus: "in_stock", stockLabel: "متوفر", imageUrl: "", specs: "", category: "custom_builds", badge: "", isFeatured: true, isBestSelling: false },
   { title: "تجميعة الميزانية المتوسطة", price: 2800000, currency: "IQD", stockStatus: "in_stock", stockLabel: "متوفر", imageUrl: "", specs: "", category: "custom_builds", badge: "", isFeatured: true, isBestSelling: true },
-  
+
   { title: "Corsair HX1000 1000W", price: 580000, currency: "IQD", stockStatus: "in_stock", stockLabel: "متوفر", imageUrl: "", specs: "", category: "psu_cases", badge: "", isFeatured: false, isBestSelling: false },
   { title: "LIAN LI PC-O11 Dynamic", price: 420000, currency: "IQD", stockStatus: "in_stock", stockLabel: "متوفر", imageUrl: "", specs: "", category: "psu_cases", badge: "الأكثر مبيعاً", isFeatured: false, isBestSelling: false },
   { title: "NZXT H7 Flow", price: 380000, currency: "IQD", stockStatus: "in_stock", stockLabel: "متوفر", imageUrl: "", specs: "", category: "psu_cases", badge: "", isFeatured: false, isBestSelling: false },
-  
+
   { title: "Logitech G Pro X TKL", price: 320000, currency: "IQD", stockStatus: "in_stock", stockLabel: "متوفر", imageUrl: "", specs: "", category: "accessories", badge: "", isFeatured: false, isBestSelling: true },
   { title: "Razer DeathAdder V3", price: 180000, currency: "IQD", stockStatus: "in_stock", stockLabel: "متوفر", imageUrl: "", specs: "", category: "accessories", badge: "", isFeatured: false, isBestSelling: false },
   { title: "SteelSeries Arctis Nova Pro", price: 420000, currency: "IQD", stockStatus: "low_stock", stockLabel: "باقي قطعتان", imageUrl: "", specs: "", category: "accessories", badge: "جديد", isFeatured: false, isBestSelling: false },
-  
+
   { title: "RTX 3080 مستعملة", price: 750000, currency: "IQD", stockStatus: "in_stock", stockLabel: "متوفر", imageUrl: "", specs: "", category: "offers", badge: "خصم 40%", isFeatured: false, isBestSelling: false },
-  { title: "Bundle معالج + لوحة أم", price: 1400000, currency: "IQD", stockStatus: "in_stock", stockLabel: "متوفر", imageUrl: "", specs: "", category: "offers", badge: "عرض خاص", isFeatured: false, isBestSelling: true }
+  { title: "Bundle معالج + لوحة أم", price: 1400000, currency: "IQD", stockStatus: "in_stock", stockLabel: "متوفر", imageUrl: "", specs: "", category: "offers", badge: "عرض خاص", isFeatured: false, isBestSelling: true },
 ];
 
 export const CATEGORIES = [
@@ -81,46 +82,75 @@ export const CATEGORIES = [
   { slug: 'offers', name: 'العروض الخاصة' },
 ];
 
+// ── Quota / generic save-error handler ──────────────────────────────────────
+function handleSaveError(err: unknown) {
+  const msg = err instanceof Error ? err.message : String(err);
+  const isQuota =
+    msg.includes('QuotaExceeded') ||
+    msg.includes('NS_ERROR_DOM_QUOTA_REACHED') ||
+    msg.includes('exceeded');
+
+  if (isQuota) {
+    alert('الملف حجمه كبير جداً — يرجى رفع صورة أو فيديو بحجم أصغر أو تقليل مدة الفيديو.');
+  } else {
+    alert('حدث خطأ أثناء الحفظ. يرجى المحاولة مجدداً.');
+  }
+}
+
+// ── Hook ────────────────────────────────────────────────────────────────────
 export function useStore() {
   const [products, setProducts] = useState<Product[]>([]);
   const [banner, setBanner] = useState<Banner>(DEFAULT_BANNER);
   const [isLoaded, setIsLoaded] = useState(false);
 
+  // Hydrate from IndexedDB on mount
   useEffect(() => {
-    const savedProducts = localStorage.getItem('ww_products');
-    const savedBanner = localStorage.getItem('ww_banner');
+    (async () => {
+      try {
+        const [savedProducts, savedBanner] = await Promise.all([
+          dbGet<Product[]>('ww_products'),
+          dbGet<Banner>('ww_banner'),
+        ]);
 
-    if (savedProducts) {
-      setProducts(JSON.parse(savedProducts));
-    } else {
-      const seeded = DEFAULT_PRODUCTS.map(p => ({ ...p, id: crypto.randomUUID() }));
-      setProducts(seeded);
-      localStorage.setItem('ww_products', JSON.stringify(seeded));
-    }
+        if (savedProducts && savedProducts.length > 0) {
+          setProducts(savedProducts);
+        } else {
+          const seeded = DEFAULT_PRODUCTS.map(p => ({ ...p, id: crypto.randomUUID() }));
+          setProducts(seeded);
+          // Best-effort seed — don't block UI if it fails
+          dbSet('ww_products', seeded).catch(() => {});
+        }
 
-    if (savedBanner) {
-      setBanner(JSON.parse(savedBanner));
-    } else {
-      setBanner(DEFAULT_BANNER);
-      localStorage.setItem('ww_banner', JSON.stringify(DEFAULT_BANNER));
-    }
-    
-    setIsLoaded(true);
+        if (savedBanner) {
+          setBanner(savedBanner);
+        } else {
+          // Best-effort — default banner needs no persistence until edited
+          setBanner(DEFAULT_BANNER);
+        }
+      } catch {
+        // IndexedDB unavailable (private browsing, etc.) — fall back to defaults
+        const seeded = DEFAULT_PRODUCTS.map(p => ({ ...p, id: crypto.randomUUID() }));
+        setProducts(seeded);
+        setBanner(DEFAULT_BANNER);
+      } finally {
+        setIsLoaded(true);
+      }
+    })();
   }, []);
 
   const addProduct = useCallback((p: Omit<Product, 'id'>) => {
-    const newProduct = { ...p, id: crypto.randomUUID() };
+    const newProduct: Product = { ...p, id: crypto.randomUUID() };
     setProducts(prev => {
       const updated = [...prev, newProduct];
-      localStorage.setItem('ww_products', JSON.stringify(updated));
+      dbSet('ww_products', updated).catch(handleSaveError);
       return updated;
     });
   }, []);
 
   const updateProduct = useCallback((id: string, p: Partial<Product>) => {
     setProducts(prev => {
-      const updated = prev.map(prod => prod.id === id ? { ...prod, ...p } : prod);
-      localStorage.setItem('ww_products', JSON.stringify(updated));
+      const updated = prev.map(prod => (prod.id === id ? { ...prod, ...p } : prod));
+      dbSet('ww_products', updated).catch(handleSaveError);
       return updated;
     });
   }, []);
@@ -128,7 +158,7 @@ export function useStore() {
   const deleteProduct = useCallback((id: string) => {
     setProducts(prev => {
       const updated = prev.filter(prod => prod.id !== id);
-      localStorage.setItem('ww_products', JSON.stringify(updated));
+      dbSet('ww_products', updated).catch(handleSaveError);
       return updated;
     });
   }, []);
@@ -136,18 +166,10 @@ export function useStore() {
   const updateBanner = useCallback((b: Partial<Banner>) => {
     setBanner(prev => {
       const updated = { ...prev, ...b };
-      localStorage.setItem('ww_banner', JSON.stringify(updated));
+      dbSet('ww_banner', updated).catch(handleSaveError);
       return updated;
     });
   }, []);
 
-  return {
-    products,
-    banner,
-    isLoaded,
-    addProduct,
-    updateProduct,
-    deleteProduct,
-    updateBanner
-  };
+  return { products, banner, isLoaded, addProduct, updateProduct, deleteProduct, updateBanner };
 }
