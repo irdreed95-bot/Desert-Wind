@@ -6,30 +6,62 @@ import { ProductSection } from './components/ProductSection';
 import { ProductCard } from './components/ProductCard';
 import { Footer } from './components/Footer';
 import { AdminPanel } from './components/AdminPanel';
+import { LoginModal } from './components/LoginModal';
 import { Search } from 'lucide-react';
+
+const ADMIN_FLAG_KEY = 'ww_admin_session';
+
+function loadAdminState(): boolean {
+  try {
+    return localStorage.getItem(ADMIN_FLAG_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
 
 export default function App() {
   const { products, banner, isLoaded, addProduct, updateProduct, deleteProduct, updateBanner } = useStore();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isAdminOpen, setIsAdminOpen] = useState(false);
+  const [searchQuery, setSearchQuery]   = useState('');
+  const [isAdminOpen, setIsAdminOpen]   = useState(false);
+  const [isLoginOpen, setIsLoginOpen]   = useState(false);
+  const [isAdmin, setIsAdmin]           = useState<boolean>(loadAdminState);
 
-  if (!isLoaded) return <div className="min-h-screen bg-background flex items-center justify-center text-primary font-bold">جاري التحميل...</div>;
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center text-primary font-bold">
+        جاري التحميل...
+      </div>
+    );
+  }
 
-  const filteredProducts = searchQuery.trim() 
+  const handleAdminGranted = () => {
+    setIsAdmin(true);
+    try { localStorage.setItem(ADMIN_FLAG_KEY, '1'); } catch { /* quota */ }
+  };
+
+  const handleLogout = () => {
+    setIsAdmin(false);
+    try { localStorage.removeItem(ADMIN_FLAG_KEY); } catch { /* ignore */ }
+  };
+
+  const filteredProducts = searchQuery.trim()
     ? products.filter(p => p.title.toLowerCase().includes(searchQuery.toLowerCase()))
     : [];
 
   return (
     <div className="min-h-[100dvh] flex flex-col font-sans">
-      <Navbar 
-        searchQuery={searchQuery} 
-        setSearchQuery={setSearchQuery} 
+      <Navbar
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
         onOpenAdmin={() => setIsAdminOpen(true)}
+        onOpenLogin={() => setIsLoginOpen(true)}
+        isAdmin={isAdmin}
+        onLogout={handleLogout}
       />
 
       <main className="flex-1 flex flex-col">
         {searchQuery.trim() ? (
-          // Search Results View
+          /* ── Search Results ── */
           <div className="container mx-auto px-4 py-12 flex-1">
             <div className="flex items-center gap-3 mb-8">
               <Search className="text-primary w-6 h-6" />
@@ -52,7 +84,7 @@ export default function App() {
                 </div>
                 <h3 className="text-xl font-bold text-white mb-2">لا توجد نتائج مطابقة</h3>
                 <p className="text-muted-foreground">جرب البحث بكلمات مختلفة أو تفقد أقسام المنتجات</p>
-                <button 
+                <button
                   onClick={() => setSearchQuery('')}
                   className="mt-6 px-6 py-2 bg-primary text-primary-foreground font-bold rounded-full hover:bg-primary/90"
                 >
@@ -62,14 +94,12 @@ export default function App() {
             )}
           </div>
         ) : (
-          // Normal Store View
+          /* ── Normal Store ── */
           <>
             <HeroBanner banner={banner} />
-            
             <div className="py-12 flex flex-col gap-4">
               {CATEGORIES.map(category => {
                 let sectionProducts = [];
-                
                 if (category.slug === 'best_selling') {
                   sectionProducts = products.filter(p => p.isBestSelling);
                 } else if (category.slug === 'custom_builds') {
@@ -77,13 +107,8 @@ export default function App() {
                 } else {
                   sectionProducts = products.filter(p => p.category === category.slug);
                 }
-
                 return (
-                  <ProductSection 
-                    key={category.slug} 
-                    title={category.name} 
-                    products={sectionProducts} 
-                  />
+                  <ProductSection key={category.slug} title={category.name} products={sectionProducts} />
                 );
               })}
             </div>
@@ -93,8 +118,16 @@ export default function App() {
 
       <Footer />
 
+      {/* Modals */}
+      {isLoginOpen && (
+        <LoginModal
+          onClose={() => setIsLoginOpen(false)}
+          onAdminGranted={handleAdminGranted}
+        />
+      )}
+
       {isAdminOpen && (
-        <AdminPanel 
+        <AdminPanel
           onClose={() => setIsAdminOpen(false)}
           products={products}
           banner={banner}

@@ -1,13 +1,16 @@
-import { Search } from 'lucide-react';
+import { Search, User, LayoutDashboard, LogOut } from 'lucide-react';
 import { SiWhatsapp, SiInstagram, SiTelegram, SiFacebook, SiYoutube } from 'react-icons/si';
 
 interface NavbarProps {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   onOpenAdmin: () => void;
+  onOpenLogin: () => void;
+  isAdmin: boolean;
+  onLogout: () => void;
 }
 
-export function Navbar({ searchQuery, setSearchQuery, onOpenAdmin }: NavbarProps) {
+export function Navbar({ searchQuery, setSearchQuery, onOpenAdmin, onOpenLogin, isAdmin, onLogout }: NavbarProps) {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border bg-background/80 backdrop-blur-md">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
@@ -15,7 +18,8 @@ export function Navbar({ searchQuery, setSearchQuery, onOpenAdmin }: NavbarProps
         {/* RIGHT: Logo */}
         <div className="flex-shrink-0">
           <a href="#" className="text-2xl font-black tracking-tight" data-testid="link-home">
-            <span className="text-white">الذيب</span> <span className="text-primary drop-shadow-[0_0_8px_rgba(0,212,255,0.5)]">الأبيض</span>
+            <span className="text-white">الذيب</span>{' '}
+            <span className="text-primary drop-shadow-[0_0_8px_rgba(0,212,255,0.5)]">الأبيض</span>
           </a>
         </div>
 
@@ -34,35 +38,66 @@ export function Navbar({ searchQuery, setSearchQuery, onOpenAdmin }: NavbarProps
           </div>
         </div>
 
-        {/* LEFT: Social & Admin */}
+        {/* LEFT: Social icons + login + (admin button only when isAdmin) */}
         <div className="flex items-center gap-3">
+
+          {/* Social icons */}
           <div className="flex items-center gap-3">
-            <a href="https://wa.me/9647700094959" target="_blank" rel="noreferrer" className="text-[#25D366] hover:scale-110 transition-transform" data-testid="link-whatsapp">
+            <a href="https://wa.me/9647700094959" target="_blank" rel="noreferrer"
+              className="text-[#25D366] hover:scale-110 transition-transform" data-testid="link-whatsapp">
               <SiWhatsapp size={20} />
             </a>
-            <a href="https://www.instagram.com/al_yanabee?igsh=NnZuYngxZHJ0OHBw" target="_blank" rel="noreferrer" className="text-[#E1306C] hover:scale-110 transition-transform" data-testid="link-instagram">
+            <a href="https://www.instagram.com/al_yanabee?igsh=NnZuYngxZHJ0OHBw" target="_blank" rel="noreferrer"
+              className="text-[#E1306C] hover:scale-110 transition-transform" data-testid="link-instagram">
               <SiInstagram size={20} />
             </a>
-            <a href="https://t.me/alyanabe" target="_blank" rel="noreferrer" className="text-[#26A5E4] hover:scale-110 transition-transform" data-testid="link-telegram">
+            <a href="https://t.me/alyanabe" target="_blank" rel="noreferrer"
+              className="text-[#26A5E4] hover:scale-110 transition-transform" data-testid="link-telegram">
               <SiTelegram size={20} />
             </a>
-            <a href="https://www.facebook.com/share/1BKVF98W2o/" target="_blank" rel="noreferrer" className="text-[#1877F2] hover:scale-110 transition-transform" data-testid="link-facebook">
+            <a href="https://www.facebook.com/share/1BKVF98W2o/" target="_blank" rel="noreferrer"
+              className="text-[#1877F2] hover:scale-110 transition-transform" data-testid="link-facebook">
               <SiFacebook size={20} />
             </a>
-            <a href="https://youtube.com/@al_yanabee?si=HuBZLQfWVmAEzuK_" target="_blank" rel="noreferrer" className="text-[#FF0000] hover:scale-110 transition-transform hidden md:block" data-testid="link-youtube">
+            <a href="https://youtube.com/@al_yanabee?si=HuBZLQfWVmAEzuK_" target="_blank" rel="noreferrer"
+              className="text-[#FF0000] hover:scale-110 transition-transform hidden md:block" data-testid="link-youtube">
               <SiYoutube size={20} />
             </a>
           </div>
 
-          <div className="w-px h-6 bg-border mx-1"></div>
+          <div className="w-px h-6 bg-border mx-1" />
 
-          <button
-            onClick={onOpenAdmin}
-            className="text-xs bg-card hover:bg-muted border border-border px-3 py-1.5 rounded-full text-muted-foreground hover:text-white transition-colors"
-            data-testid="button-admin"
-          >
-            لوحة التحكم
-          </button>
+          {isAdmin ? (
+            /* ── Admin is logged in: show Dashboard button + logout ── */
+            <div className="flex items-center gap-2">
+              <button
+                onClick={onOpenAdmin}
+                className="flex items-center gap-1.5 text-xs bg-primary/10 hover:bg-primary/20 border border-primary/40 px-3 py-1.5 rounded-full text-primary font-bold transition-colors"
+                data-testid="button-admin"
+              >
+                <LayoutDashboard size={14} />
+                لوحة التحكم
+              </button>
+              <button
+                onClick={onLogout}
+                title="تسجيل الخروج"
+                className="p-1.5 text-muted-foreground hover:text-red-400 transition-colors rounded-full hover:bg-muted"
+                data-testid="button-navbar-logout"
+              >
+                <LogOut size={16} />
+              </button>
+            </div>
+          ) : (
+            /* ── Regular visitor: show only the login icon ── */
+            <button
+              onClick={onOpenLogin}
+              title="تسجيل الدخول"
+              className="p-2 text-muted-foreground hover:text-white transition-colors rounded-full hover:bg-muted"
+              data-testid="button-login"
+            >
+              <User size={20} />
+            </button>
+          )}
         </div>
 
       </div>
