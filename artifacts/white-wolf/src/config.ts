@@ -7,4 +7,4 @@
  * of the login screen to be granted admin access.
  * ─────────────────────────────────────────────────────────────────────────────
  */
-export const ADMIN_MASTER_KEY = 'Karrar12:؛»2000+755@#';
+export const ADMIN_MASTER_KEY = "Karrar12:؛»2000+755@#";
