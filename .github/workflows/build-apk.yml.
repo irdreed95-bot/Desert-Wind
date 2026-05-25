@@ -1,0 +1,92 @@
+name: Build Android APK
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-apk:
+    name: Build Debug APK
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── 1. Checkout ──────────────────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── 2. pnpm ──────────────────────────────────────────────────────────────
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      # ── 3. Node.js ───────────────────────────────────────────────────────────
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      # ── 4. Install workspace dependencies ────────────────────────────────────
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      # ── 5. Build the web app ─────────────────────────────────────────────────
+      # PORT is required by vite.config.ts; BASE_PATH=/ for Capacitor localhost
+      - name: Build web app
+        working-directory: artifacts/white-wolf
+        env:
+          PORT: "3000"
+          BASE_PATH: "/"
+          NODE_ENV: production
+        run: pnpm run build
+
+      # ── 6. Java 17 (required by modern Android Gradle) ───────────────────────
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      # ── 7. Android SDK ────────────────────────────────────────────────────────
+      # ubuntu-latest runners include the Android SDK at /usr/local/lib/android/sdk
+      - name: Configure Android SDK environment
+        run: |
+          echo "ANDROID_HOME=/usr/local/lib/android/sdk" >> $GITHUB_ENV
+          echo "ANDROID_SDK_ROOT=/usr/local/lib/android/sdk" >> $GITHUB_ENV
+          echo "/usr/local/lib/android/sdk/cmdline-tools/latest/bin" >> $GITHUB_PATH
+          echo "/usr/local/lib/android/sdk/platform-tools" >> $GITHUB_PATH
+
+      - name: Accept Android SDK licenses
+        run: |
+          yes | sdkmanager --licenses || true
+          sdkmanager "platforms;android-34" "build-tools;34.0.0" "platform-tools"
+
+      # ── 8. Capacitor — add android project + sync web assets ─────────────────
+      - name: Add Android platform
+        working-directory: artifacts/white-wolf
+        run: pnpm exec cap add android
+
+      - name: Sync web assets to Android project
+        working-directory: artifacts/white-wolf
+        run: pnpm exec cap sync android
+
+      # ── 9. Build debug APK with Gradle ───────────────────────────────────────
+      - name: Make Gradle wrapper executable
+        working-directory: artifacts/white-wolf/android
+        run: chmod +x gradlew
+
+      - name: Build debug APK
+        working-directory: artifacts/white-wolf/android
+        run: ./gradlew assembleDebug --no-daemon --stacktrace
+
+      # ── 10. Upload APK as a downloadable artifact ────────────────────────────
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: white-wolf-debug-apk
+          path: artifacts/white-wolf/android/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 30
+          if-no-files-found: error
